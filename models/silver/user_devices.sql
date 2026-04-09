@@ -1,4 +1,4 @@
--- depends_on: {{ ref('devices') }}
+
 {{ config(
     materialized='table',
     table_format='delta',

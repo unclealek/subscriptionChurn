@@ -1,4 +1,6 @@
 plan_id,plan_name,plan_tier,billing_cycle,monthly_price,currency,ad_supported_flag,concurrent_stream_limit,is_active
 PLAN_FREE,Free,free,monthly,0,EUR,true,1,true
+PLAN_TRIAL,Trial,trial,monthly,0,EUR,true,1,true
 PLAN_STD,Standard,standard,monthly,9.99,EUR,false,2,true
 PLAN_PREM,Premium,premium,monthly,14.99,EUR,false,4,true
+PLAN_CANCELLED,Cancelled,cancelled,monthly,0,EUR,true,1,false

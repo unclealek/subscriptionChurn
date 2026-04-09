@@ -1,4 +1,4 @@
--- depends_on: {{ ref('genres') }}
+
 {{ config(
     materialized='table',
     table_format='delta',

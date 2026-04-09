@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: movie_raw
     description: "Raw tables from Databricks movie_raw database"
-    database: transform 
+    database: transform
     schema: movie_raw
     tables:
       - name: users_seed
