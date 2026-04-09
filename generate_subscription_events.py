@@ -8,9 +8,13 @@ import pandas as pd
 # ----------------------------
 # Config
 # ----------------------------
-SEED_DIR = "seeds"
-OUTPUT_DIR = "generated/subscription_events"
-OUTPUT_FILE = "subscription_events_2026_04_09_12.json"
+# Use absolute path to seeds folder in the same directory as this script
+SEED_DIR = "/Workspace/Users/kelvin.aliche@gmail.com/transformation/seeds"
+CATALOG = "transform"
+SCHEMA = "movierecommendation"
+VOLUME = "raw_data"
+OUTPUT_DIR = f"/Volumes/{CATALOG}/{SCHEMA}/{VOLUME}/subscription_events"
+OUTPUT_FILE = f"subscription_events_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 NUM_ROWS = 32
 
 BASE_START = datetime(2026, 4, 8, 0, 0, 0)
@@ -23,7 +27,15 @@ random.seed(99)
 # Helpers
 # ----------------------------
 def ensure_output_dir(path: str):
-    os.makedirs(path, exist_ok=True)
+    """Create directory in Volume if it doesn't exist"""
+    if path.startswith("/Volumes/"):
+        # Use dbutils for Volume paths
+        try:
+            dbutils.fs.mkdirs(path)
+        except Exception as e:
+            print(f"Directory may already exist or error creating: {e}")
+    else:
+        os.makedirs(path, exist_ok=True)
 
 
 def load_csv(filename: str) -> pd.DataFrame:

@@ -5,12 +5,16 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 
+
 # ----------------------------
 # Config
 # ----------------------------
-SEED_DIR = "seeds"
-OUTPUT_DIR = "generated/viewing_sessions"
-OUTPUT_FILE = "viewing_sessions_2026_04_09_12.json"
+SEED_DIR = "/Workspace/Users/kelvin.aliche@gmail.com/transformation/seeds"
+CATALOG = "transform"
+SCHEMA = "movierecommendation"
+VOLUME = "raw_data"
+OUTPUT_DIR = f"/Volumes/{CATALOG}/{SCHEMA}/{VOLUME}/viewing_sessions"
+OUTPUT_FILE = f"viewing_sessions_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 NUM_ROWS = 72
 
 BASE_START = datetime(2026, 4, 8, 0, 0, 0)
@@ -23,7 +27,15 @@ random.seed(42)
 # Helpers
 # ----------------------------
 def ensure_output_dir(path: str):
-    os.makedirs(path, exist_ok=True)
+    """Create directory in Volume if it doesn't exist"""
+    if path.startswith("/Volumes/"):
+        # Use dbutils for Volume paths
+        try:
+            dbutils.fs.mkdirs(path)
+        except Exception as e:
+            print(f"Directory may already exist or error creating: {e}")
+    else:
+        os.makedirs(path, exist_ok=True)
 
 
 def load_csv(filename: str) -> pd.DataFrame:
