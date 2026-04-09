@@ -13,6 +13,8 @@ models:
         description: "Date when the user signed up for the service"
         data_tests:
           - not_null
+      - name: signup_month
+        description: "Month bucket derived from signup_date"
 
       - name: country_code
         description: "ISO country code where the user is located"
@@ -24,16 +26,30 @@ models:
         description: "Foreign key to subscription_plans"
         data_tests:
           - accepted_values:
-              values: ['PLAN_FREE', 'PLAN_TRIAL', 'PLAN_STD', 'PLAN_PREM', 'PLAN_CANCELLED']
+              arguments:
+                values: ['PLAN_FREE', 'PLAN_TRIAL', 'PLAN_STD', 'PLAN_PREM', 'PLAN_CANCELLED']
       - name: initial_subscription_status
         description: "Initial subscription status (free, trial, premium, cancelled)"
         data_tests:
           - accepted_values:
-              values: ['free', 'trial', 'standard', 'premium', 'cancelled']
+              arguments:
+                values: ['free', 'trial', 'standard', 'premium', 'cancelled']
+      - name: initial_plan_name
+        description: "Canonical plan name derived from the plan catalog"
+      - name: initial_plan_tier
+        description: "Canonical plan tier derived from the plan catalog"
+      - name: initial_monthly_price
+        description: "Standardized monthly price for the initial plan"
+      - name: initial_plan_currency
+        description: "Currency for the initial plan price"
+      - name: is_paid_subscriber
+        description: "Boolean indicating whether the initial plan is paid"
       - name: age_band
         description: "Age range bracket of the user"
       - name: preferred_device_type
         description: "User's preferred device type for viewing content"
+      - name: preferred_device_family
+        description: "Higher-level device grouping derived from preferred_device_type"
       - name: created_at
         description: "Timestamp when the user record was created"
 
@@ -49,9 +65,14 @@ models:
         description: "Display name of the subscription plan"
         data_tests:
           - accepted_values:
-              values: ['Free', 'Standard', 'Trial', 'Premium', 'Cancelled']
+              arguments:
+                values: ['Free', 'Standard', 'Trial', 'Premium', 'Cancelled']
       - name: plan_tier
         description: "Tier level of the plan (free, trial, standard, premium)"
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['free', 'trial', 'standard', 'premium', 'cancelled']
       - name: billing_cycle
         description: "Billing frequency (monthly, yearly, etc.)"
       - name: monthly_price
@@ -64,6 +85,14 @@ models:
         description: "Maximum number of simultaneous streams allowed"
       - name: is_active
         description: "Boolean indicating if plan is currently available"
+      - name: is_paid_plan
+        description: "Boolean indicating whether the plan is paid"
+      - name: is_trial_plan
+        description: "Boolean indicating whether the plan is a trial"
+      - name: is_cancelled_plan
+        description: "Boolean indicating whether the plan represents cancellation"
+      - name: plan_rank
+        description: "Ordinal rank used to compare plan tiers"
 
   - name: user_devices  # This is a SOURCE
     description: "Raw device catalog from Databricks"
@@ -85,6 +114,10 @@ models:
         description: "Version of the application installed"
       - name: is_active
         description: "Boolean indicating if device is currently active"
+      - name: device_family
+        description: "Higher-level grouping of the device type"
+      - name: app_major_version
+        description: "Major version extracted from app_version"
 
   - name: movie_genres  # This is a SOURCE
     description: "Raw content genre taxonomy from Databricks"
@@ -102,6 +135,8 @@ models:
         description: "Foreign key to genres for hierarchical structure"
       - name: is_active
         description: "Boolean indicating if genre is currently active"
+      - name: is_top_level_genre
+        description: "Boolean indicating whether the genre has no parent"
 
   - name: content  # This is a SOURCE
     description: "Raw content library from Databricks"
@@ -131,6 +166,10 @@ models:
         description: "Boolean indicating if content is suitable for children"
       - name: is_active
         description: "Boolean indicating if content is available for streaming"
+      - name: content_age_years
+        description: "Derived age of the content in years"
+      - name: runtime_bucket
+        description: "Duration category derived from content type and runtime"
 
 # These next two are your SILVER MODELS (transformations)
   - name: subs_events
@@ -149,6 +188,12 @@ models:
         description: "Plan ID before the event"
       - name: new_plan_id
         description: "Plan ID after the event"
+      - name: old_status
+        description: "Canonical status derived from the plan before the event"
+      - name: new_status
+        description: "Canonical status derived from the plan after the event"
+      - name: plan_change_type
+        description: "Derived classification of the subscription plan transition"
       - name: event_ts
         description: "Timestamp when event occurred"
       - name: event_date
@@ -174,5 +219,13 @@ models:
         description: "Timestamp when session ended"
       - name: watch_minutes
         description: "Total minutes watched"
+      - name: session_duration_minutes
+        description: "Elapsed session length derived from start and end timestamps"
+      - name: completion_pct
+        description: "Bounded completion percentage"
+      - name: completion_bucket
+        description: "Bucketized completion percentage"
       - name: session_date
         description: "Date of the session for partitioning"
+      - name: session_quality_flag
+        description: "Quality check result comparing watch time and timestamps"
