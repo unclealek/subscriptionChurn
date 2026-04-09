@@ -33,4 +33,10 @@ models:
   subscriptionChurn:
     # Config indicated by + and applies to all files under models/example/
     example:
-      +materialized: view
+      +materialized: table
+      +file_format: delta
+
+seeds:
+  dbtDatabricks:
+    +batch_size: 10
+
