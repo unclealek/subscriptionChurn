@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: movie_raw
+    description: "Raw tables from Databricks movie_raw database"
+    database: transform 
+    schema: movie_raw
+    tables:
+      - name: users_seed
+        description: "Raw users data"
+      - name: subscription_plans
+        description: "Raw subscription plans data"
+      - name: devices
+        description: "Raw devices data"
+      - name: genres
+        description: "Raw genres data"
+      - name: content_catalog
+        description: "Raw content catalog data"
+      - name: bronze_subscription_events
+        description: "Raw subscription events"
+      - name: bronze_viewing_sessions
+        description: "Raw viewing sessions"

@@ -24,19 +24,13 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 
 # Configuring models
-# Full documentation: https://docs.getdbt.com/docs/configuring-models
-
-# In this example config, we tell dbt to build all models in the example/
-# directory as views. These settings can be overridden in the individual model
-# files using the `{{ config(...) }}` macro.
 models:
   subscriptionChurn:
-    # Config indicated by + and applies to all files under models/example/
-    example:
+    silver:
       +materialized: table
       +file_format: delta
 
 seeds:
-  dbtDatabricks:
-    +batch_size: 10
-
+  subscriptionChurn:  # Changed from dbtDatabricks to your project name
+    +schema: seeds
+    +batch_size: 100

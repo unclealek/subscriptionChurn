@@ -1,0 +1,17 @@
+version: 2
+
+seeds:
+  - name: users_seed
+    description: "User data loaded from CSV"
+
+  - name: subscription_plans
+    description: "Subscription plans loaded from CSV"
+
+  - name: devices
+    description: "Devices loaded from CSV"
+
+  - name: genres
+    description: "Genres loaded from CSV"
+
+  - name: content_catalog
+    description: "Content catalog loaded from CSV"

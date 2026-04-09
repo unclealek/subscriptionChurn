@@ -1,0 +1,175 @@
+version: 2
+
+models:
+  - name: users  # This is actually a SOURCE, not a model
+    description: "Raw user dimension table from Databricks"
+    columns:
+      - name: user_id
+        description: "Unique identifier for each user (Primary Key)"
+        data_tests:
+          - unique
+          - not_null
+      - name: signup_date
+        description: "Date when the user signed up for the service"
+        data_tests:
+          - not_null
+
+      - name: country_code
+        description: "ISO country code where the user is located"
+      - name: market
+        description: "Market segment the user belongs to"
+      - name: acquisition_channel
+        description: "Marketing channel through which the user was acquired"
+      - name: initial_plan_id
+        description: "Foreign key to subscription_plans"
+      - name: initial_subscription_status
+        description: "Initial subscription status (free, trial, premium, cancelled)"
+        data_tests:
+          - accepted_values:
+              values: ['free', 'trial', 'premium', 'cancelled']
+      - name: age_band
+        description: "Age range bracket of the user"
+      - name: preferred_device_type
+        description: "User's preferred device type for viewing content"
+      - name: created_at
+        description: "Timestamp when the user record was created"
+
+  - name: subs_plan  # This is a SOURCE
+    description: "Raw subscription plan catalog from Databricks"
+    columns:
+      - name: plan_id
+        description: "Unique identifier for each subscription plan (Primary Key)"
+        data_tests:
+          - unique
+          - not_null
+      - name: plan_name
+        description: "Display name of the subscription plan"
+        data_tests:
+          - accepted_values:
+              values: ['free', 'standard', 'premium']
+      - name: plan_tier
+        description: "Tier level of the plan (free, trial, standard, premium)"
+      - name: billing_cycle
+        description: "Billing frequency (monthly, yearly, etc.)"
+      - name: monthly_price
+        description: "Monthly subscription price"
+      - name: currency
+        description: "Currency code for the pricing"
+      - name: ad_supported_flag
+        description: "Boolean indicating if plan includes advertisements"
+      - name: concurrent_stream_limit
+        description: "Maximum number of simultaneous streams allowed"
+      - name: is_active
+        description: "Boolean indicating if plan is currently available"
+
+  - name: devices  # This is a SOURCE
+    description: "Raw device catalog from Databricks"
+    columns:
+      - name: device_id
+        description: "Unique identifier for each device (Primary Key)"
+        data_tests:
+          - unique
+          - not_null
+      - name: device_type
+        description: "Type of device (smart_tv, mobile, tablet, desktop)"
+      - name: manufacturer
+        description: "Device manufacturer name"
+      - name: os_name
+        description: "Operating system name"
+      - name: app_platform
+        description: "Platform where the app runs"
+      - name: app_version
+        description: "Version of the application installed"
+      - name: is_active
+        description: "Boolean indicating if device is currently active"
+
+  - name: genres  # This is a SOURCE
+    description: "Raw content genre taxonomy from Databricks"
+    columns:
+      - name: genre_id
+        description: "Unique identifier for each genre (Primary Key)"
+        data_tests:
+          - unique
+          - not_null
+      - name: genre_name
+        description: "Display name of the genre"
+      - name: genre_group
+        description: "Higher-level grouping of related genres"
+      - name: parent_genre_id
+        description: "Foreign key to genres for hierarchical structure"
+      - name: is_active
+        description: "Boolean indicating if genre is currently active"
+
+  - name: content  # This is a SOURCE
+    description: "Raw content library from Databricks"
+    columns:
+      - name: content_id
+        description: "Unique identifier for each content item (Primary Key)"
+        data_tests:
+          - unique
+          - not_null
+      - name: title
+        description: "Title of the content"
+      - name: genre_id
+        description: "Foreign key to genres"
+      - name: subgenre
+        description: "More specific genre classification"
+      - name: content_type
+        description: "Type of content (movie, series, live, documentary)"
+      - name: release_year
+        description: "Year the content was released"
+      - name: duration_minutes
+        description: "Total duration in minutes"
+      - name: language
+        description: "Primary language of the content"
+      - name: age_rating
+        description: "Age rating for content appropriateness"
+      - name: is_kids_content
+        description: "Boolean indicating if content is suitable for children"
+      - name: is_active
+        description: "Boolean indicating if content is available for streaming"
+
+# These next two are your SILVER MODELS (transformations)
+  - name: subs_events
+    description: "Cleaned and transformed subscription events (silver layer)"
+    columns:
+      - name: subscription_event_id
+        description: "Unique identifier for each subscription event"
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: "Foreign key to users"
+      - name: event_type
+        description: "Type of subscription event"
+      - name: old_plan_id
+        description: "Plan ID before the event"
+      - name: new_plan_id
+        description: "Plan ID after the event"
+      - name: event_ts
+        description: "Timestamp when event occurred"
+      - name: event_date
+        description: "Date extracted from event_ts for partitioning"
+
+  - name: view_sess
+    description: "Cleaned and transformed viewing sessions (silver layer)"
+    columns:
+      - name: session_id
+        description: "Unique identifier for each viewing session"
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: "Foreign key to users"
+      - name: device_id
+        description: "Foreign key to devices"
+      - name: content_id
+        description: "Foreign key to content_catalog"
+      - name: session_start_ts
+        description: "Timestamp when session started"
+      - name: session_end_ts
+        description: "Timestamp when session ended"
+      - name: watch_minutes
+        description: "Total minutes watched"
+      - name: session_date
+        description: "Date of the session for partitioning"
