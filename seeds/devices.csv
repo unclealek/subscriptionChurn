@@ -1,0 +1,5 @@
+device_id,device_type,manufacturer,os_name,app_platform,app_version,is_active
+D001,smart_tv,Samsung,Tizen,tv_app,3.1.0,true
+D002,mobile,Apple,iOS,ios_app,5.4.2,true
+D003,mobile,Google,Android,android_app,4.2.1,true
+

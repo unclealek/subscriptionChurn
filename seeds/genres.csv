@@ -1,0 +1,4 @@
+genre_id,genre_name,genre_group,parent_genre_id,is_active
+G001,Drama,Entertainment,,true
+G002,Comedy,Entertainment,,true
+G003,Sports,Live,,true

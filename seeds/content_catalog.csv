@@ -1,0 +1,4 @@
+content_id,title,genre_id,subgenre,content_type,release_year,duration_minutes,language,age_rating,is_kids_content,is_active
+C001,Nordic Crime Night,G001,Crime,series,2024,45,Finnish,16,false,true
+C002,Weekend Laughs,G002,Sitcom,series,2025,25,Finnish,7,false,true
+C003,Football Live Finland,G003,Football,live,2026,120,Finnish,0,false,true

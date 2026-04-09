@@ -1,0 +1,3 @@
+user_id,signup_date,country_code,market,acquisition_channel,initial_plan_id,initial_subscription_status,age_band,preferred_device_type,created_at
+U001,2026-01-05,FI,Finland,organic,PLAN_FREE,free,25-34,smart_tv,2026-01-05 09:00:00
+U002,2026-01-11,FI,Finland,paid_social,PLAN_TRIAL,trial,35-44,mobile,2026-01-11 10:30:00
