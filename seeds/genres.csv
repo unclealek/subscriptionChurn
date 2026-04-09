@@ -2,3 +2,25 @@ genre_id,genre_name,genre_group,parent_genre_id,is_active
 G001,Drama,Entertainment,,true
 G002,Comedy,Entertainment,,true
 G003,Sports,Live,,true
+G004,Thriller,Entertainment,G001,true
+G005,Crime,Entertainment,G001,true
+G006,Romance,Entertainment,G002,true
+G007,Documentary,Factual,,true
+G008,History,Factual,G007,true
+G009,Science,Factual,G007,true
+G010,Nature,Factual,G007,true
+G011,Animation,Kids,,true
+G012,Family,Kids,G011,true
+G013,Preschool,Kids,G011,true
+G014,Horror,Entertainment,G004,true
+G015,Mystery,Entertainment,G005,true
+G016,Musical,Entertainment,G002,true
+G017,Fantasy,Entertainment,G001,true
+G018,Adventure,Entertainment,G017,true
+G019,Reality,Unscripted,,true
+G020,Game Show,Unscripted,G019,true
+G021,Talk Show,Unscripted,G019,true
+G022,News,Factual,,true
+G023,Weather,Live,G022,true
+G024,Fitness,Sports,G003,true
+G025,E-sports,Sports,G003,true
