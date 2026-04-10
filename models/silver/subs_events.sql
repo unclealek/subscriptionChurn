@@ -11,18 +11,10 @@ with events as (
         subscription_event_id,
         user_id,
         event_type,
-        -- Normalize legacy old plan IDs before classifying the transition.
-        case
-            when old_plan_id = 'PLAN_BASIC' then 'PLAN_STD'
-            when old_plan_id = 'PLAN_PREMIUM' then 'PLAN_PREM'
-            else old_plan_id
-        end as old_plan_id,
-        -- Normalize legacy new plan IDs before pricing and status mapping.
-        case
-            when new_plan_id = 'PLAN_BASIC' then 'PLAN_STD'
-            when new_plan_id = 'PLAN_PREMIUM' then 'PLAN_PREM'
-            else new_plan_id
-        end as new_plan_id,
+        -- Keep old plan IDs aligned to the seed contract.
+        old_plan_id,
+        -- Keep new plan IDs aligned to the seed contract.
+        new_plan_id,
         old_status,
         new_status,
         event_ts,

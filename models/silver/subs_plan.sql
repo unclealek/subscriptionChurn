@@ -12,12 +12,8 @@ with source_data as (
 )
 
 select
-    -- Map legacy plan identifiers into the canonical silver plan IDs.
-    case
-        when plan_id = 'PLAN_BASIC' then 'PLAN_STD'
-        when plan_id = 'PLAN_PREMIUM' then 'PLAN_PREM'
-        else plan_id
-    end as plan_id,
+    -- Keep plan IDs aligned to the seed contract.
+    plan_id,
     -- Standardize display casing for downstream reporting.
     initcap(lower(plan_name)) as plan_name,
     -- Keep plan tiers in lowercase for consistent testing and joins.

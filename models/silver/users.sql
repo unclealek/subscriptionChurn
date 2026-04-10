@@ -22,18 +22,14 @@ normalized as (
         initcap(lower(market)) as market,
         -- Keep channel values lowercase for stable categorization.
         lower(acquisition_channel) as acquisition_channel,
-        -- Rewrite legacy plan IDs so users align with the canonical plan catalog.
-        case
-            when initial_plan_id = 'PLAN_BASIC' then 'PLAN_STD'
-            when initial_plan_id = 'PLAN_PREMIUM' then 'PLAN_PREM'
-            else initial_plan_id
-        end as initial_plan_id,
-        -- Derive a canonical status from the plan ID and fall back to the raw status only if needed.
+        -- Keep initial plan IDs aligned to the seed contract.
+        initial_plan_id,
+        -- Derive a canonical status from the seed-backed plan ID and fall back to the raw status only if needed.
         case
             when initial_plan_id = 'PLAN_FREE' then 'free'
             when initial_plan_id = 'PLAN_TRIAL' then 'trial'
-            when initial_plan_id in ('PLAN_STD', 'PLAN_BASIC') then 'standard'
-            when initial_plan_id in ('PLAN_PREM', 'PLAN_PREMIUM') then 'premium'
+            when initial_plan_id = 'PLAN_STD' then 'standard'
+            when initial_plan_id = 'PLAN_PREM' then 'premium'
             when initial_plan_id = 'PLAN_CANCELLED' then 'cancelled'
             else lower(initial_subscription_status)
         end as initial_subscription_status,
@@ -47,12 +43,8 @@ normalized as (
 
 plan_catalog as (
     select
-        -- Match the same canonical plan ID mapping used in users and events.
-        case
-            when plan_id = 'PLAN_BASIC' then 'PLAN_STD'
-            when plan_id = 'PLAN_PREMIUM' then 'PLAN_PREM'
-            else plan_id
-        end as plan_id,
+        -- Keep plan IDs aligned to the seed contract before joining into users.
+        plan_id,
         -- Standardize display casing before joining into the user dimension.
         initcap(lower(plan_name)) as plan_name,
         -- Keep tiers lowercase for downstream filters.
