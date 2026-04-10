@@ -1,75 +1,136 @@
-Welcome to your new dbt project!
+# Subscription Churn Analytics
 
-### Using the starter project
+This project builds a dbt analytics pipeline for subscription churn analysis on top of seeded reference data and generated streaming behavior.
 
-Try running the following commands:
-- dbt run
-- dbt test
+## Project Scope
 
+The pipeline is organized in two modeling layers:
 
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+- `silver`: cleaned and standardized operational tables
+- `gold`: business-facing fact tables and analytical marts
 
+The current ground truth for plans and users comes from the seed files:
 
-### Subscription Churn Analysis
-## Track Steps
-- cd to project directory
-- dbt init
-- create schema and catalog in Databricks
-- create git repo
-- push to github
-- Step 1
+- `seeds/users_seed.csv`
+- `seeds/subscription_plans.csv`
+- `seeds/devices.csv`
+- `seeds/genres.csv`
+- `seeds/content_catalog.csv`
 
-Create reference CSVs:
+Silver models are expected to follow that seed contract.
 
-users
-devices
-genres
-subscription_plans
-content_catalog
+## Seed Data
 
-Step 2
+Reference entities are stored as CSV seeds:
 
-Create Python generator for viewing sessions
+- `users_seed`
+- `subscription_plans`
+- `devices`
+- `genres`
+- `content_catalog`
 
-Step 3
+Generated event-style inputs live under `generated/`:
 
-Create Python generator for subscription events
+- viewing sessions
+- subscription events
 
-Step 4
+## Silver Models
 
-Drop files into raw volumne
+The silver layer standardizes raw and seed-backed data into reusable analytical tables.
 
-Step 5
+- `users`
+  - standardizes user attributes
+  - derives canonical initial subscription status
+  - enriches users with initial plan metadata
+- `subs_plan`
+  - standardizes plan labels and types
+  - adds paid, trial, cancelled, and rank flags
+- `subs_events`
+  - standardizes subscription statuses
+  - derives `plan_change_type`
+  - aligns `price` and `currency` to `new_plan_id`
+- `view_sess`
+  - standardizes session timestamps and booleans
+  - derives session duration, completion buckets, and quality flags
+- `content`
+  - standardizes content metadata
+  - derives content age and runtime buckets
+- `user_devices`
+  - standardizes device and OS metadata
+  - derives device families and app major version
+- `movie_genres`
+  - standardizes genre labels
+  - identifies top-level genres
 
-Load into Bronze tables into schema/table
-Step 6
+## Gold Models
 
-Build Silver models in dbt:
+### Fact Tables
 
-clean users
-clean content
-clean viewing sessions
-clean subscription events
-Step 7
+- `fact_subscription_events`
+  - joins subscription events to users and plans
+- `fact_viewing_sessions`
+  - joins viewing sessions to users, devices, content, and latest subscription state
+- `fact_daily_user_engagement`
+  - one row per user per day
+  - includes total watch minutes, session count, distinct titles watched, average completion, current 7-day average, previous 7-day average, and engagement drop percentage
 
-Build Gold models:
+### Analytical Marts
 
-fact_viewing_sessions
-fact_subscription_events
-dim_users_scd2
-dim_content
-dim_genre
-dim_subscription_plans
-Step 8
+- `mart_churn_signals`
+  - flags users when engagement drops materially
+  - includes current and previous 7-day averages, engagement drop percentage, churn flag, and risk band
+- `mart_subscription_attribution`
+  - attributes subscription events to viewing behavior in the prior 24 hours
+  - includes last watched title, most watched title, most watched genre, total watch minutes, title count, and attribution method
+- `mart_user_clv`
+  - combines subscription history, engagement, and churn risk
+  - includes first subscription date, current plan, tenure, revenue to date, active days in the last 30 days, churn flag, and estimated CLV
 
-Build marts:
+## Build Order
 
-daily engagement
-attribution
-churn
-CLV
+Recommended execution order:
+
+1. `dbt seed`
+2. `dbt run --select models/silver`
+3. `dbt run --select fact_subscription_events fact_viewing_sessions`
+4. `dbt run --select fact_daily_user_engagement mart_churn_signals mart_subscription_attribution mart_user_clv`
+5. `dbt test`
+
+## Common Commands
+
+Run the full project:
+
+```bash
+dbt run
+dbt test
+```
+
+Build only the silver layer:
+
+```bash
+dbt run --select models/silver
+```
+
+Build only the gold layer:
+
+```bash
+dbt run --select models/gold
+```
+
+Build the churn-related outputs:
+
+```bash
+dbt run --select fact_daily_user_engagement mart_churn_signals mart_user_clv
+```
+
+Build the attribution output:
+
+```bash
+dbt run --select mart_subscription_attribution
+```
+
+## Notes
+
+- The project uses Databricks with Delta tables.
+- Transformation comments are included directly in the SQL models for derived fields.
+- Current gold engagement logic only produces rows for dates with at least one viewing session; it does not yet generate zero-activity dates.

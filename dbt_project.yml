@@ -29,8 +29,10 @@ models:
     silver:
       +materialized: table
       +file_format: delta
+    gold:
+      +materialized: table
+      +file_format: delta
 
 seeds:
   subscriptionChurn:  # Changed from dbtDatabricks to your project name
-    +schema: seeds
     +batch_size: 100

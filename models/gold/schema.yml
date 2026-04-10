@@ -1,0 +1,190 @@
+version: 2
+
+models:
+  - name: fact_subscription_events
+    description: "Gold fact table for subscription events enriched with user and plan attributes"
+    columns:
+      - name: subscription_event_id
+        description: "Unique identifier for each subscription event"
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: "User associated with the subscription event"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('users')
+                field: user_id
+      - name: new_plan_id
+        description: "Canonical destination plan for the event"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('subs_plan')
+                field: plan_id
+      - name: new_plan_tier
+        description: "Plan tier for the destination plan"
+      - name: plan_change_type
+        description: "Derived subscription transition type"
+      - name: event_ts
+        description: "Timestamp when the event occurred"
+      - name: event_date
+        description: "Date of the event"
+      - name: price
+        description: "Standardized price associated with the destination plan"
+
+  - name: fact_viewing_sessions
+    description: "Gold fact table for viewing sessions enriched with user, device, content, and subscription context"
+    columns:
+      - name: session_id
+        description: "Unique identifier for each viewing session"
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: "User associated with the viewing session"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('users')
+                field: user_id
+      - name: device_id
+        description: "Device used for the viewing session"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('user_devices')
+                field: device_id
+      - name: content_id
+        description: "Content watched in the session"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('content')
+                field: content_id
+      - name: latest_subscription_event_id
+        description: "Most recent subscription event for the user at or before the session start"
+      - name: session_plan_id
+        description: "Subscription plan active at the time of the session"
+      - name: session_subscription_status
+        description: "Subscription status active at the time of the session"
+      - name: session_start_ts
+        description: "Timestamp when the session started"
+      - name: session_date
+        description: "Date of the session"
+      - name: watch_minutes
+        description: "Minutes watched during the session"
+        data_tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: completion_pct
+        description: "Completion percentage for the session"
+
+  - name: fact_daily_user_engagement
+    description: "Daily user engagement fact table at one row per user per day"
+    columns:
+      - name: user_id
+        description: "User associated with the engagement day"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('users')
+                field: user_id
+      - name: engagement_date
+        description: "Date of the engagement row"
+        data_tests:
+          - not_null
+      - name: total_watch_minutes
+        description: "Total minutes watched by the user on that day"
+      - name: session_count
+        description: "Number of sessions for the user on that day"
+      - name: distinct_titles_watched
+        description: "Distinct titles watched by the user on that day"
+      - name: average_completion
+        description: "Average session completion percent on that day"
+      - name: rolling_7d_avg_watch_minutes
+        description: "Current 7-day average watch minutes"
+      - name: previous_7d_avg_watch_minutes
+        description: "Previous 7-day average watch minutes"
+      - name: engagement_drop_pct
+        description: "Percentage drop from the previous 7-day average to the current 7-day average"
+
+  - name: mart_churn_signals
+    description: "User-day churn signal mart based on engagement deterioration and subscription state"
+    columns:
+      - name: user_id
+        description: "User evaluated for churn risk"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('users')
+                field: user_id
+      - name: engagement_date
+        description: "Date the churn signal is evaluated"
+      - name: current_7d_avg
+        description: "Current rolling 7-day average watch minutes"
+      - name: previous_7d_avg
+        description: "Previous rolling 7-day average watch minutes"
+      - name: engagement_drop_pct
+        description: "Percentage drop between the current and previous engagement windows"
+      - name: churn_red_flag
+        description: "Boolean flag identifying a material drop in engagement"
+      - name: risk_band
+        description: "Categorical churn risk level"
+
+  - name: mart_subscription_attribution
+    description: "Subscription attribution mart that links subscription events to viewing behavior in the prior 24 hours"
+    columns:
+      - name: subscription_event_id
+        description: "Subscription event being attributed"
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: "User associated with the subscription event"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('users')
+                field: user_id
+      - name: attributed_title
+        description: "Most recent title watched within the 24-hour attribution window"
+      - name: most_watched_title
+        description: "Title with the highest watch time within the 24-hour attribution window"
+      - name: attributed_genre
+        description: "Genre with the highest watch time within the 24-hour attribution window"
+      - name: total_watch_minutes_before_signup
+        description: "Total watch minutes in the 24-hour lookback window"
+      - name: number_of_titles_watched
+        description: "Distinct titles watched in the 24-hour lookback window"
+      - name: attribution_method
+        description: "Rule used to assign attribution"
+
+  - name: mart_user_clv
+    description: "CLV-ready user mart combining subscription history, engagement, and churn risk"
+    columns:
+      - name: user_id
+        description: "User represented in the CLV mart"
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('users')
+                field: user_id
+      - name: first_subscription_date
+        description: "First monetized subscription date for the user"
+      - name: current_plan_id
+        description: "Current subscription plan for the user"
+      - name: tenure_days
+        description: "Days since the first subscription date"
+      - name: revenue_to_date
+        description: "Total recognized revenue to date"
+      - name: active_days_last_30_days
+        description: "Distinct active viewing days in the last 30 days"
+      - name: churn_red_flag
+        description: "Current churn warning flag"
+      - name: estimated_clv
+        description: "Simple CLV estimate derived from revenue and churn risk"

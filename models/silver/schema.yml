@@ -28,6 +28,10 @@ models:
           - accepted_values:
               arguments:
                 values: ['PLAN_FREE', 'PLAN_TRIAL', 'PLAN_STD', 'PLAN_PREM', 'PLAN_CANCELLED']
+          - relationships:
+              arguments:
+                to: ref('subs_plan')
+                field: plan_id
       - name: initial_subscription_status
         description: "Initial subscription status (free, trial, premium, cancelled)"
         data_tests:
@@ -150,6 +154,11 @@ models:
         description: "Title of the content"
       - name: genre_id
         description: "Foreign key to genres"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('movie_genres')
+                field: genre_id
       - name: subgenre
         description: "More specific genre classification"
       - name: content_type
@@ -182,12 +191,31 @@ models:
           - not_null
       - name: user_id
         description: "Foreign key to users"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('users')
+                field: user_id
       - name: event_type
         description: "Type of subscription event"
       - name: old_plan_id
         description: "Plan ID before the event"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('subs_plan')
+                field: plan_id
+              config:
+                where: "old_plan_id is not null"
       - name: new_plan_id
         description: "Plan ID after the event"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('subs_plan')
+                field: plan_id
+              config:
+                where: "new_plan_id is not null"
       - name: old_status
         description: "Canonical status derived from the plan before the event"
       - name: new_status
@@ -209,16 +237,35 @@ models:
           - not_null
       - name: user_id
         description: "Foreign key to users"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('users')
+                field: user_id
       - name: device_id
         description: "Foreign key to devices"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('user_devices')
+                field: device_id
       - name: content_id
         description: "Foreign key to content_catalog"
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('content')
+                field: content_id
       - name: session_start_ts
         description: "Timestamp when session started"
       - name: session_end_ts
         description: "Timestamp when session ended"
       - name: watch_minutes
         description: "Total minutes watched"
+        data_tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
       - name: session_duration_minutes
         description: "Elapsed session length derived from start and end timestamps"
       - name: completion_pct
