@@ -55,32 +55,19 @@ resource "databricks_job" "subscription_churn_pipeline" {
   }
 
   task {
-    task_key = "dbt_deps"
+    task_key = "dbt_seed"
 
     depends_on {
       task_key = "create_bronze_tables"
     }
 
+    # Each dbt task runs deps first because Databricks task workspaces are isolated.
+    # This keeps task-level observability while ensuring dbt_packages exists.
     dbt_task {
-      commands     = ["dbt deps"]
-      source       = "GIT"
-      warehouse_id = var.warehouse_id
-      catalog      = var.dbt_catalog
-      schema       = var.dbt_schema
-    }
-
-    environment_key = local.python_env_key
-  }
-
-  task {
-    task_key = "dbt_seed"
-
-    depends_on {
-      task_key = "dbt_deps"
-    }
-
-    dbt_task {
-      commands     = ["dbt seed"]
+      commands = [
+        "dbt deps",
+        "dbt seed"
+      ]
       source       = "GIT"
       warehouse_id = var.warehouse_id
       catalog      = var.dbt_catalog
@@ -97,8 +84,13 @@ resource "databricks_job" "subscription_churn_pipeline" {
       task_key = "dbt_seed"
     }
 
+    # Install packages in this task as well because Databricks does not share
+    # dbt_packages from dbt_seed with downstream dbt tasks.
     dbt_task {
-      commands     = ["dbt run --select models/silver"]
+      commands = [
+        "dbt deps",
+        "dbt run --select models/silver"
+      ]
       source       = "GIT"
       warehouse_id = var.warehouse_id
       catalog      = var.dbt_catalog
@@ -115,8 +107,12 @@ resource "databricks_job" "subscription_churn_pipeline" {
       task_key = "dbt_run_silver"
     }
 
+    # Install packages in this task as well because each dbt task is isolated.
     dbt_task {
-      commands     = ["dbt run --select models/gold"]
+      commands = [
+        "dbt deps",
+        "dbt run --select models/gold"
+      ]
       source       = "GIT"
       warehouse_id = var.warehouse_id
       catalog      = var.dbt_catalog
@@ -133,8 +129,12 @@ resource "databricks_job" "subscription_churn_pipeline" {
       task_key = "dbt_run_gold"
     }
 
+    # Install packages before testing so generic tests from packages are available.
     dbt_task {
-      commands     = ["dbt test"]
+      commands = [
+        "dbt deps",
+        "dbt test"
+      ]
       source       = "GIT"
       warehouse_id = var.warehouse_id
       catalog      = var.dbt_catalog
