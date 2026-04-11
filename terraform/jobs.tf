@@ -151,8 +151,7 @@ resource "databricks_job" "subscription_churn_pipeline" {
         "dbt-databricks==1.11.6"
       ]
 
-      environment_version   = "4"
-      environment_variables = local.generator_environment_variables
+      environment_version = "4"
     }
   }
 
