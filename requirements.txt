@@ -1,0 +1,5 @@
+dbt-core==1.11.6
+dbt-databricks==1.11.6
+pandas
+numpy
+faker

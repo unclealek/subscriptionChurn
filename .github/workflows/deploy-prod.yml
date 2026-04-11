@@ -1,0 +1,50 @@
+name: Deploy Prod
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    env:
+      TF_VAR_databricks_host: ${{ secrets.DATABRICKS_HOST }}
+      TF_VAR_databricks_token: ${{ secrets.DATABRICKS_TOKEN }}
+      TF_VAR_warehouse_id: ${{ secrets.DATABRICKS_WAREHOUSE_ID }}
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.12.1"
+
+      - name: Terraform init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform plan prod
+        working-directory: terraform
+        run: terraform plan -var-file=envs/prod.tfvars -out=tfplan
+
+      - name: Terraform apply prod
+        working-directory: terraform
+        run: terraform apply -auto-approve tfplan
+
+      - name: Capture Databricks job id
+        id: job
+        working-directory: terraform
+        run: echo "job_id=$(terraform output -raw pipeline_job_id)" >> "$GITHUB_OUTPUT"
+
+      - name: Run Databricks prod workflow and wait for quality checks
+        env:
+          DATABRICKS_JOB_ID: ${{ steps.job.outputs.job_id }}
+        run: python scripts/wait_for_databricks_job.py

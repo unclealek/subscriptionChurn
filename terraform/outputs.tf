@@ -1,9 +1,9 @@
-output "generating_job_id" {
-  description = "Databricks job ID for the generating data job"
-  value       = databricks_job.generating.id
+output "pipeline_job_id" {
+  description = "Databricks Workflow job ID for the subscription churn pipeline"
+  value       = databricks_job.subscription_churn_pipeline.id
 }
 
-output "generating_job_url" {
-  description = "Databricks job URL for the generating data job"
-  value       = databricks_job.generating.url
+output "pipeline_job_url" {
+  description = "Databricks Workflow URL for the subscription churn pipeline"
+  value       = databricks_job.subscription_churn_pipeline.url
 }

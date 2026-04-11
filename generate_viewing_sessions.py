@@ -9,10 +9,11 @@ import pandas as pd
 # ----------------------------
 # Config
 # ----------------------------
-SEED_DIR = "/Workspace/Users/kelvin.aliche@gmail.com/transformation/seeds"
-CATALOG = "transform"
-SCHEMA = "movierecommendation"
-VOLUME = "raw_data"
+# Use environment variables so the same script can run in dev and prod jobs.
+SEED_DIR = os.getenv("SEED_DIR", "/Workspace/Users/kelvin.aliche@gmail.com/transformation/seeds")
+CATALOG = os.getenv("VOLUME_CATALOG", "transform")
+SCHEMA = os.getenv("VOLUME_SCHEMA", "movierecommendation")
+VOLUME = os.getenv("VOLUME_NAME", "raw_data")
 OUTPUT_DIR = f"/Volumes/{CATALOG}/{SCHEMA}/{VOLUME}/viewing_sessions"
 OUTPUT_FILE = f"viewing_sessions_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 NUM_ROWS = 72

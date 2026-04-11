@@ -1,5 +1,6 @@
 locals {
-  repo_base_path      = "/Users/kelvin.aliche@gmail.com/transformation/"
-  generating_job_name = "Generating"
-  python_env_key      = "generate_viewing_sessions"
+  pipeline_job_name = "${var.project_name}-${var.environment}-pipeline"
+  python_env_key    = "subscription-churn-python"
+
+  workspace_project_path = trimsuffix(var.workspace_project_path, "/")
 }
