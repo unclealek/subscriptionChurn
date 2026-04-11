@@ -11,7 +11,7 @@ resource "databricks_job" "subscription_churn_pipeline" {
     task_key = "generate_subscription_events"
 
     spark_python_task {
-      python_file = "${local.workspace_project_path}/generate_subscription_events.py"
+      python_file = var.subscription_events_script_path
     }
 
     environment_key = local.python_env_key
@@ -21,7 +21,7 @@ resource "databricks_job" "subscription_churn_pipeline" {
     task_key = "generate_viewing_sessions"
 
     spark_python_task {
-      python_file = "${local.workspace_project_path}/generate_viewing_sessions.py"
+      python_file = var.viewing_sessions_script_path
     }
 
     environment_key = local.python_env_key

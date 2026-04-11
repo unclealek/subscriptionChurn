@@ -31,6 +31,18 @@ variable "workspace_project_path" {
   default     = "/Workspace/Users/kelvin.aliche@gmail.com/transformation"
 }
 
+variable "subscription_events_script_path" {
+  type        = string
+  description = "Databricks workspace path to the script that generates subscription event JSON files"
+  default     = "/Workspace/Users/kelvin.aliche@gmail.com/transformation/generate_subscription_events.py"
+}
+
+variable "viewing_sessions_script_path" {
+  type        = string
+  description = "Databricks workspace path to the script that generates viewing session JSON files"
+  default     = "/Workspace/Users/kelvin.aliche@gmail.com/transformation/generate_viewing_sessions.py"
+}
+
 variable "bronze_loader_script_path" {
   type        = string
   description = "Databricks workspace path to the script that loads generated JSON into bronze Delta tables"
