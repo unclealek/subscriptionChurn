@@ -1,5 +1,6 @@
 environment                     = "dev"
 dbt_target                      = "dev"
+git_branch                      = "dev"
 dbt_catalog                     = "transform"
 dbt_schema                      = "dbt_silver"
 volume_catalog                  = "transform"

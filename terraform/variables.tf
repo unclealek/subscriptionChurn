@@ -27,8 +27,25 @@ variable "environment" {
 
 variable "workspace_project_path" {
   type        = string
-  description = "Databricks workspace path containing the project files"
+  description = "Databricks workspace path containing the operational Python scripts"
   default     = "/Workspace/Users/kelvin.aliche@gmail.com/transformation"
+}
+
+variable "git_url" {
+  type        = string
+  description = "Git URL containing the dbt project"
+  default     = "https://github.com/unclealek/subscriptionChurn.git"
+}
+
+variable "git_provider" {
+  type        = string
+  description = "Databricks Git provider name"
+  default     = "gitHub"
+}
+
+variable "git_branch" {
+  type        = string
+  description = "Git branch used by Databricks dbt tasks"
 }
 
 variable "subscription_events_script_path" {
@@ -68,7 +85,7 @@ variable "dbt_schema" {
 
 variable "dbt_target" {
   type        = string
-  description = "dbt target name used by Databricks dbt tasks"
+  description = "dbt target name used by local and CI dbt commands"
 }
 
 variable "volume_catalog" {

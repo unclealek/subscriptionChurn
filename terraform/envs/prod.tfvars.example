@@ -1,5 +1,6 @@
 environment            = "prod"
 dbt_target             = "prod"
+git_branch             = "main"
 dbt_catalog            = "transform"
 dbt_schema             = "dbt_silver"
 volume_catalog         = "transform"

@@ -1,6 +1,12 @@
 resource "databricks_job" "subscription_churn_pipeline" {
   name = local.pipeline_job_name
 
+  git_source {
+    url      = var.git_url
+    provider = var.git_provider
+    branch   = var.git_branch
+  }
+
   schedule {
     quartz_cron_expression = var.job_cron_expression
     timezone_id            = var.job_timezone
@@ -12,6 +18,7 @@ resource "databricks_job" "subscription_churn_pipeline" {
 
     spark_python_task {
       python_file = var.subscription_events_script_path
+      source      = "WORKSPACE"
     }
 
     environment_key = local.python_env_key
@@ -22,6 +29,7 @@ resource "databricks_job" "subscription_churn_pipeline" {
 
     spark_python_task {
       python_file = var.viewing_sessions_script_path
+      source      = "WORKSPACE"
     }
 
     environment_key = local.python_env_key
@@ -40,6 +48,7 @@ resource "databricks_job" "subscription_churn_pipeline" {
 
     spark_python_task {
       python_file = var.bronze_loader_script_path
+      source      = "WORKSPACE"
     }
 
     environment_key = local.python_env_key
@@ -53,12 +62,11 @@ resource "databricks_job" "subscription_churn_pipeline" {
     }
 
     dbt_task {
-      project_directory = local.workspace_project_path
-      commands          = ["dbt deps"]
-      source            = "WORKSPACE"
-      warehouse_id      = var.warehouse_id
-      catalog           = var.dbt_catalog
-      schema            = var.dbt_schema
+      commands     = ["dbt deps"]
+      source       = "GIT"
+      warehouse_id = var.warehouse_id
+      catalog      = var.dbt_catalog
+      schema       = var.dbt_schema
     }
 
     environment_key = local.python_env_key
@@ -72,12 +80,11 @@ resource "databricks_job" "subscription_churn_pipeline" {
     }
 
     dbt_task {
-      project_directory = local.workspace_project_path
-      commands          = ["dbt seed --target ${var.dbt_target}"]
-      source            = "WORKSPACE"
-      warehouse_id      = var.warehouse_id
-      catalog           = var.dbt_catalog
-      schema            = var.dbt_schema
+      commands     = ["dbt seed"]
+      source       = "GIT"
+      warehouse_id = var.warehouse_id
+      catalog      = var.dbt_catalog
+      schema       = var.dbt_schema
     }
 
     environment_key = local.python_env_key
@@ -91,12 +98,11 @@ resource "databricks_job" "subscription_churn_pipeline" {
     }
 
     dbt_task {
-      project_directory = local.workspace_project_path
-      commands          = ["dbt run --target ${var.dbt_target} --select models/silver"]
-      source            = "WORKSPACE"
-      warehouse_id      = var.warehouse_id
-      catalog           = var.dbt_catalog
-      schema            = var.dbt_schema
+      commands     = ["dbt run --select models/silver"]
+      source       = "GIT"
+      warehouse_id = var.warehouse_id
+      catalog      = var.dbt_catalog
+      schema       = var.dbt_schema
     }
 
     environment_key = local.python_env_key
@@ -110,12 +116,11 @@ resource "databricks_job" "subscription_churn_pipeline" {
     }
 
     dbt_task {
-      project_directory = local.workspace_project_path
-      commands          = ["dbt run --target ${var.dbt_target} --select models/gold"]
-      source            = "WORKSPACE"
-      warehouse_id      = var.warehouse_id
-      catalog           = var.dbt_catalog
-      schema            = var.dbt_schema
+      commands     = ["dbt run --select models/gold"]
+      source       = "GIT"
+      warehouse_id = var.warehouse_id
+      catalog      = var.dbt_catalog
+      schema       = var.dbt_schema
     }
 
     environment_key = local.python_env_key
@@ -129,12 +134,11 @@ resource "databricks_job" "subscription_churn_pipeline" {
     }
 
     dbt_task {
-      project_directory = local.workspace_project_path
-      commands          = ["dbt test --target ${var.dbt_target}"]
-      source            = "WORKSPACE"
-      warehouse_id      = var.warehouse_id
-      catalog           = var.dbt_catalog
-      schema            = var.dbt_schema
+      commands     = ["dbt test"]
+      source       = "GIT"
+      warehouse_id = var.warehouse_id
+      catalog      = var.dbt_catalog
+      schema       = var.dbt_schema
     }
 
     environment_key = local.python_env_key
