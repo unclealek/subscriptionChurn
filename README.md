@@ -129,6 +129,51 @@ Build the attribution output:
 dbt run --select mart_subscription_attribution
 ```
 
+## CI/CD And Deployment
+
+The project is set up for one Git repo with two environments:
+
+- `dev` branch deploys the Databricks dev workflow
+- `main` branch deploys the Databricks prod workflow
+
+GitHub Actions workflows:
+
+- `.github/workflows/ci.yml`
+  - installs dbt dependencies
+  - runs `dbt deps`
+  - runs `dbt parse`
+  - runs `dbt compile`
+  - runs `terraform fmt -check`
+  - runs `terraform validate`
+- `.github/workflows/deploy-dev.yml`
+  - applies Terraform using `terraform/envs/dev.tfvars`
+  - triggers the Databricks workflow
+  - waits for the workflow to finish
+  - fails the GitHub run if the Databricks workflow or dbt tests fail
+- `.github/workflows/deploy-prod.yml`
+  - applies Terraform using `terraform/envs/prod.tfvars`
+  - triggers the production Databricks workflow
+  - waits for the workflow to finish
+  - fails the GitHub run if the production workflow or dbt tests fail
+
+Required GitHub secrets:
+
+- `DATABRICKS_HOST`
+- `DATABRICKS_TOKEN`
+- `DATABRICKS_HTTP_PATH`
+- `DATABRICKS_WAREHOUSE_ID`
+
+The Databricks workflow runs:
+
+1. generate subscription events
+2. generate viewing sessions
+3. create bronze Delta tables
+4. `dbt deps`
+5. `dbt seed`
+6. `dbt run --select models/silver`
+7. `dbt run --select models/gold`
+8. `dbt test`
+
 ## Notes
 
 - The project uses Databricks with Delta tables.

@@ -2,3 +2,14 @@
 target/
 dbt_packages/
 logs/
+.venv/
+__pycache__/
+*.pyc
+.env
+profiles.yml
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfvars
+!terraform/envs/*.tfvars
+!terraform/envs/*.tfvars.example
